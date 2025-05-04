@@ -24,7 +24,7 @@ import importlib
 #   
 # Set the workspace to point to the geodatabase you are using for this lab
 
-arcpy.env.workspace = r"R:\2025\Spring\GEOG562\Instructors\kennedy_2025\Lab4\Lab4_arcproject_REK\Lab4_arcproject_REK.gdb" 
+arcpy.env.workspace = r"C:\GEOG562_TemporaryProjects\Data\Lab4_2025\lab4_starter_database.gdb" 
 
 ############################################################################
 # Block 3:  We are going to work with the notion of extending raster objects
@@ -47,10 +47,9 @@ print(r.metadata["bounds"])
 #  Why do we need to use the "super()" function in the definition of the SmartRaster?
 
 # Your answer:
-
-
-
-
+# The super() function is added to call the original class in a clean way (not hard code).
+# The original class is initialized in this way and then the new class being created inherits
+# its functionality and then adds to it in a custom way.
 
 
 # Block 4:  Add a method to the SmartRaster class to calculate the NDVI
@@ -80,7 +79,7 @@ if okay:
     # Write the NDVI raster to a new file
     try:
         ndvi.save(out_ndvi_file)
-        print(f"{out_ndvi_file}written successfully.")
+        print(f"{out_ndvi_file} written successfully.")
     except Exception as e:
         print(f"Error writing NDVI raster: {e}")    
 else:
@@ -93,9 +92,10 @@ else:
 #    set them here -- why did it work?
 
 #  Your answer:
-
-
-
+# This worked because NDVI is always calculated with NIR and Red, which in theory is 
+# usually associated with Landsat Bands 4 and 3. So, our calculate_ndvi can have default values
+# set to these bands. If we do not pass any arguments, the default values will be used. Maybe we should
+# call this function calculate_ndvi_landsat.
 
 ##########################################################
 # Block 5:  Now, let's look at setting up an equivalent type of
@@ -108,7 +108,7 @@ else:
 #  Go to lab4_functions and find the class
 #   for SmartVectorLayer. 
 
-#  UNCOMMENT THE ENTIRE CLASS (use shift /)
+#  UNCOMMENT THE ENTIRE CLASS (use Ctrl /)
 
 #  vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 #  Following my comment prompts in that file, 
@@ -140,12 +140,11 @@ smart_vector.save_as("Corvallis_parcels_plusNDVI")
 #    Does it look like the zonal stats for NDVI worked
 #     reasonably?  Any observations or oddities? 
 # 
-
 #Your answer
-
-
-
-
+# It seems the zonal stats operation worked reasonably well.
+# I do see many null values however. After visually inspecting the 
+# the feature class, I believe the very small polygons that do not include
+# the center of a raster cannot calulate the mean and are therefore Null.
 
 
 # Block 6: 
@@ -169,10 +168,11 @@ okay, df = smart_vector.extract_to_pandas_df()
 #   code?  
 
 # Your answer
-
-
-
-
+# When you assign fields = None in the original call you are setting the
+# default fields value to None, this means that we don't have to pass any
+# fields to this method, we can simply write it as we did above with no arguments.
+# This makes the code much easier because we can rely on the .ListFields method
+# instead of us having to write in the fields and making typos, etc.
 
 #################################################
 # Block 7: 
@@ -195,20 +195,18 @@ sp.scatterplot(x_field, y_field, x_min=1901, x_max = 2030)
 
 
 # question 7.1
-#  in the scatterplot function, I have this piece of code:
+#  In the scatterplot function, I have this piece of code:
 #  if x_min is not None:
 #           df_to_plot = df_to_plot[df_to_plot[x_field] >= x_min]
 #  You'll note that I use the same test for x_min not being "None". 
 # But what about the second line -- what is df_to_plot, 
 #    and what does this line achieve? 
 #  
-
-
 # Your answer:
-
-
-
-
+# This line takes the x_min argument and sets it as the lower limit of the scatter plot
+# on the x axis. The data will be filtered based on this and only values above this x_min
+# will be plotted. If no x_min is passed and the default None is used, the map will scale 
+# automatically to fit the data.
 
 ###############################################################
 #  Block 8
@@ -234,15 +232,17 @@ sp.scatterplot(x_field, y_field, x_min=1901, x_max = 2030)
 #      Thus, you can point to the file itself without  the full
 #      path if you want. 
 
+importlib.reload(l4)
+
 # You have the SmartPanda as "sp" from above, right?
 #   Here, and you have the name of the file for the control file
 #  Below, simply call the "plot_from_file" method to run the .csv fil
 
-param_file = 'params_1.csv'  #  this assumes you've placed in the 
+param_file = 'params_2000s.csv'  #  this assumes you've placed in the 
                             # python code directory you're working in here. 
 # Your code:
-
-
+# I don't understand this prompt? It seems the correct code is below?
+# I copied the params_1.csv file to the python working directory.
 
 #  My code
 
@@ -267,14 +267,23 @@ if ok:
 #    numeric?   How might you make this work better?
 
 # Your answer
-
-
+# The required fields are strings so that is fine, but the
+# optional parameters are numeric, so we need to convert the strings to
+# integers or float so the pandas function can read it correctly, the
+# following code was added to do just that:
+        # for p in optional_params:
+        #     val = param_dict.get(p, None)
+        #     try:
+        #         param_dict[p] = float(val) if val not in [None, 'None', ''] else None
+        #     except (ValueError, TypeError):
+        #         print (f"Could not convert {p}='{val}' to flaot.")
+        #         param_dict[p] = None
 
 
 # Question 8.2
 #  In your lab document, paste in a couple of the
 #    examples of the output .png files. 
-
+# DONE
 
 
 # Question 8.3
@@ -285,6 +294,10 @@ if ok:
 #   how you might achieve that?
 
 # Your answer:
+# within the save_scatterplot function change
+# this method:  plt.savefig(outfile) to and f-string that
+# can have {x} and {y} be placeholders to receive whatever
+# values you give it, and the f-string will update that on the fly.
 
 
 
